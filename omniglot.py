@@ -107,28 +107,6 @@ class AudioDatasetTest(Dataset):
 
         self.lengths = len(self.file_list)
 
-        if params['apply_cmvn']:
-
-            assert os.path.isfile(os.path.join(params[name], 'utt2spk'))
-            assert os.path.isfile(os.path.join(params[name], 'cmvn.scp'))
-
-            self.utt2spk = {}
-            with open(os.path.join(params[name], 'utt2spk'), 'r') as f:
-                for line in f:
-                    utt_id, spk_id = line.strip().split()
-                    self.utt2spk[utt_id] = spk_id
-                print('Load Speaker INFO')
-
-            self.cmvns = {}
-            with open(os.path.join(params[name], 'cmvn.scp'), 'r') as f:
-                for line in f:
-                    spk_id, path = line.strip().split()
-                    self.cmvns[spk_id] = path
-                print('Load CMVN Stats')
-
-        # if self.params['spec_augment'] and self.name == 'train':
-        #
-        #     print('Apply spec_augment!')
 
     def __getitem__(self, index):
         utt_id, path = self.file_list[index]
@@ -147,11 +125,6 @@ class AudioDatasetTest(Dataset):
             except:
                 print(f"path = {path}")
 
-        if self.params['apply_cmvn']:
-            spk_id = self.utt2spk[utt_id]
-            stats = kio.load_mat(self.cmvns[spk_id])
-            feature = apply_cmvn(feature, stats)
-
         if self.params['normalization']:
             feature = normalization(feature)
             # print(f"featuretype1 = {feature.type()}")
@@ -166,9 +139,6 @@ class AudioDatasetTest(Dataset):
                 # print("*"*50)
                 pass
 
-        if self.left_frames > 0 or self.right_frames > 0:
-            feature = concat_and_subsample(feature, left_frames=self.left_frames,
-                                           right_frames=self.right_frames, skip_frames=self.skip_frames)
 
         feature_length = feature.shape[0]
         targets = self.targets_dict[utt_id]
@@ -297,18 +267,14 @@ class AudioDataset(Dataset):
                     self.datasetSplit[idxTmp] = start
                 self.file_list.append([idx, path])
                 num += 1
-        print(self.datasetSplit)
-        # print(self.file_list)
+        # print(self.datasetSplit)
+        print(f"len_datasetSplit = {len(self.datasetSplit)}")
 
         assert len(self.file_list) == len(
             self.targets_dict), 'please keep feats.scp and %s have the same lines.' % params['text']
 
         self.lengths = len(self.file_list)
 
-
-        if self.params['spec_augment'] and self.name == 'train':
-
-            print('Apply spec_augment!')
 
     def __getitem__(self, index):
 
@@ -384,6 +350,45 @@ class AudioDataset(Dataset):
     def batch_size(self):
         return self.params['batch_size']
 
+def collate_fn_with_eos_bos_indepTask(batch):
+
+    k_shot = 7
+    k_query = 7
+    utt_ids = [data[0] for data in batch]
+    features_length = [data[2] for data in batch]
+    targets_length = [data[4] for data in batch]
+    max_feature_length = max(features_length)
+    max_target_length = max(targets_length)
+
+    padded_features = []
+    padded_targets = []
+
+    for _, feat, feat_len, target, target_len in batch:
+        padded_features.append(np.pad(feat, ((
+            0, max_feature_length-feat_len), (0, 0)), mode='constant', constant_values=0.0))
+        padded_targets.append(
+            [BOS] + target + [EOS] + [PAD] * (max_target_length - target_len))
+
+    features = padded_features
+    targets = padded_targets
+    features_length = np.array(features_length)
+    targets_length = np.array(targets_length)
+
+    #划分support和query集
+    utt_ids_spt = utt_ids[:k_shot]
+    features_spt = np.array(features[:k_shot]).reshape(k_shot, -1, 40)
+    features_spt_length = np.array(features_length[:k_shot])
+    targets_spt = np.array(targets[:k_shot]).reshape(k_shot, -1)
+    targets_spt_length = np.array(targets_length[:k_shot])
+
+    utt_ids_qry = utt_ids[k_shot:]
+    features_qry = np.array(features[k_shot:]).reshape(k_query, -1, 40)
+    features_qry_length = np.array(features_length[k_shot:])
+    targets_qry = np.array(targets[k_shot:]).reshape(k_query, -1)
+    targets_qry_length = np.array(targets_length[k_shot:])
+
+
+    return utt_ids_spt, features_spt, features_spt_length, targets_spt, targets_spt_length, utt_ids_qry, features_qry, features_qry_length, targets_qry, targets_qry_length
 
 
 def collate_fn_with_eos_bos(batch):
@@ -435,8 +440,6 @@ def collate_fn_with_eos_bos(batch):
     query.append(targets_qry)
     query.append(targets_qry_length)
 
-
-
     return support, query
 
 
@@ -459,23 +462,23 @@ class FeatureLoader(object):
         indicesAll = list(range(len(dataset)))
 
 
-        self.samplerTask1 = MySubsetSampler(indicesAll[dataset.datasetSplit[keys[0]]:dataset.datasetSplit[keys[1]]])
-        self.samplerTask2 = MySubsetSampler(indicesAll[dataset.datasetSplit[keys[1]]:dataset.datasetSplit[keys[2]]])
-        self.samplerTask3 = MySubsetSampler(indicesAll[dataset.datasetSplit[keys[2]]:dataset.datasetSplit[keys[3]]])
+        self.samplerTask1 = MySubsetSampler(indicesAll[dataset.datasetSplit[keys[0]]:dataset.datasetSplit[keys[113]]])
+        self.samplerTask2 = MySubsetSampler(indicesAll[dataset.datasetSplit[keys[113]]:dataset.datasetSplit[keys[226]]])
+        self.samplerTask3 = MySubsetSampler(indicesAll[dataset.datasetSplit[keys[226]]:dataset.datasetSplit[keys[339]]])
 
 
         self.loaderTask1 = torch.utils.data.DataLoader(dataset, batch_size=dataset.batch_size,
                                                   shuffle=False,drop_last=True,
                                                   num_workers=2 * ngpu, pin_memory=False, sampler=self.samplerTask1,
-                                                  collate_fn=collate_fn_with_eos_bos)
+                                                  collate_fn=collate_fn_with_eos_bos_indepTask)
         self.loaderTask2 = torch.utils.data.DataLoader(dataset, batch_size=dataset.batch_size,
                                                   shuffle=False, drop_last=True,
                                                   num_workers=2 * ngpu, pin_memory=False, sampler=self.samplerTask2,
-                                                  collate_fn=collate_fn_with_eos_bos)
+                                                  collate_fn=collate_fn_with_eos_bos_indepTask)
         self.loaderTask3 = torch.utils.data.DataLoader(dataset, batch_size=dataset.batch_size,
                                                   shuffle=False, drop_last=True,
                                                   num_workers=2 * ngpu, pin_memory=False, sampler=self.samplerTask3,
-                                                  collate_fn=collate_fn_with_eos_bos)
+                                                  collate_fn=collate_fn_with_eos_bos_indepTask)
 
 
 def lengthTrans(listTest):
@@ -511,8 +514,6 @@ def appendSet(listSet:list, n_way, k_shot_query):
 
     padded_features = []
     padded_targets = []
-
-
 
     for i in range(listLen):
         for j in range(k_shot_query):
@@ -569,12 +570,12 @@ if __name__ == "__main__":
     from copy import deepcopy
 
     argparser = argparse.ArgumentParser()
-    argparser.add_argument('--epoch', type=int, help='epoch number', default=4000)
+    argparser.add_argument('--epoch', type=int, help='epoch number', default=400)
     argparser.add_argument('--n_way', type=int, help='n way', default=5)
     argparser.add_argument('--k_spt', type=int, help='k shot for support set', default=1)
     argparser.add_argument('--k_qry', type=int, help='k shot for query set', default=3)
 
-    argparser.add_argument('--task_num', type=int, help='meta batch size, namely task num', default=2)
+    argparser.add_argument('--task_num', type=int, help='meta batch size, namely task num', default=3)
     argparser.add_argument('--meta_lr', type=float, help='meta-level outer learning rate', default=1e-3)
     argparser.add_argument('--update_lr', type=float, help='task-level inner update learning rate', default=0.1)
     argparser.add_argument('--update_step', type=int, help='task-level inner update steps', default=5)
@@ -597,7 +598,7 @@ if __name__ == "__main__":
     logger = init_logger(log_file=os.path.join(expdir, 'train.log'))
 
 
-    train_dataset = AudioDataset(params['data'], 'test')
+    train_dataset = AudioDataset(params['data'], 'train')
 
     train_loader = FeatureLoader(train_dataset, shuffle=False, ngpu=1,
                                  mode='dp')
@@ -641,67 +642,67 @@ if __name__ == "__main__":
             # print(f"step = {step}")
             # print(f"utt_ids = {utt_ids}")
 
-            (supportTask1, queryTask1) = data[0]
-            (supportTask2, queryTask2) = data[1]
-            (supportTask3, queryTask3) = data[2]
-
+            # (supportTask1, queryTask1) = data[0]
+            # (supportTask2, queryTask2) = data[1]
+            # (supportTask3, queryTask3) = data[2]
+            #
             # print("*" * 50)
             # print(f"supportTask1 = {supportTask1}")
             # print("*" * 50)
             # print(f"supportTask2 = {supportTask2}")
             # print("*" * 50)
             # print(f"supportTask3 = {supportTask3}")
+            for i in range(args.task_num):
+                utt_ids_spt, features_spt, features_length_spt, targets_spt, targets_length_spt,\
+                utt_ids_qry, features_qry, features_length_qry, targets_qry, targets_length_qry = data[i]
 
-            utt_ids_spt, features_spt, features_length_spt, targets_spt, targets_length_spt = appendSet([supportTask1, supportTask2, supportTask3], n_way=3, k_shot_query=3)
-            utt_ids_qry, features_qry, features_length_qry, targets_qry, targets_length_qry = appendSet([queryTask1, queryTask2, queryTask3], n_way=3, k_shot_query=3)
+                utt_ids_spts.append(utt_ids_spt)
+                features_spts.append(features_spt)
+                features_length_spts.append(features_length_spt)
+                targets_spts.append(targets_spt)
+                targets_length_spts.append(targets_length_spt)
+
+                utt_ids_qrys.append(utt_ids_qry)
+                features_qrys.append(features_qry)
+                features_length_qrys.append(features_length_qry)
+                targets_qrys.append(targets_qry)
+                targets_length_qrys.append(targets_length_qry)
 
 
-            utt_ids_spts.append(utt_ids_spt)
-            features_spts.append(features_spt)
-            features_length_spts.append(features_length_spt)
-            targets_spts.append(targets_spt)
-            targets_length_spts.append(targets_length_spt)
 
-            utt_ids_qrys.append(utt_ids_qry)
-            features_qrys.append(features_qry)
-            features_length_qrys.append(features_length_qry)
-            targets_qrys.append(targets_qry)
-            targets_length_qrys.append(targets_length_qry)
 
-            if (step+1) % args.task_num == 0:
+            # print(f"features_spts = {features_spts}")
+            # print(f"features_length_spts = {features_length_spts}")
+            # print(f"targets_spts = {targets_spts}")
+            # print(f"targets_length_spts = {targets_length_spts}")
 
-                # print(f"features_spts = {features_spts}")
-                # print(f"features_length_spts = {features_length_spts}")
-                # print(f"targets_spts = {targets_spts}")
-                # print(f"targets_length_spts = {targets_length_spts}")
+            support = {
+                "features_spts": features_spts,
+                "features_length_spts": features_length_spts,
+                "targets_spts": targets_spts,
+                "targets_length_spts": targets_length_spts
+            }
+            query = {
+                "features_qrys": features_qrys,
+                "features_length_qrys": features_length_qrys,
+                "targets_qrys": targets_qrys,
+                "targets_length_qrys": targets_length_qrys
+            }
 
-                support = {
-                    "features_spts": features_spts,
-                    "features_length_spts": features_length_spts,
-                    "targets_spts": targets_spts,
-                    "targets_length_spts": targets_length_spts
-                }
-                query = {
-                    "features_qrys": features_qrys,
-                    "features_length_qrys": features_length_qrys,
-                    "targets_qrys": targets_qrys,
-                    "targets_length_qrys": targets_length_qrys
-                }
+            loss = maml(support, query)
+            print('step:', step, '\ttraining loss:', loss.item())
 
-                loss = maml(support, query)
-                # print('step:', epoch, '\ttraining acc:', loss)
+            utt_ids_spts = []
+            features_spts = []
+            features_length_spts = []
+            targets_spts = []
+            targets_length_spts = []
 
-                utt_ids_spts = []
-                features_spts = []
-                features_length_spts = []
-                targets_spts = []
-                targets_length_spts = []
-
-                utt_ids_qrys = []
-                features_qrys = []
-                features_length_qrys = []
-                targets_qrys = []
-                targets_length_qrys = []
+            utt_ids_qrys = []
+            features_qrys = []
+            features_length_qrys = []
+            targets_qrys = []
+            targets_length_qrys = []
 
         if (epoch) % 1 == 0:
             logger.info(f"'epoch:', {epoch}, 'training loss:', {loss}")

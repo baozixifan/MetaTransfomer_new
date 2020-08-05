@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6fae5c9f-2239-48c4-9ff0-5a4f21236d16" name="Default Changelist" comment="" />
+    <list default="true" id="6fae5c9f-2239-48c4-9ff0-5a4f21236d16" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/egs/aishellorg/conf/transformer.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/egs/aishellorg/conf/transformer.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/egs/aishellorg/data/dev/text" beforeDir="false" afterPath="$PROJECT_DIR$/egs/aishellorg/data/dev/text" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/egs/aishellorg/data/dev/wav.scp" beforeDir="false" afterPath="$PROJECT_DIR$/egs/aishellorg/data/dev/wav.scp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/egs/aishellorg/data/test/text" beforeDir="false" afterPath="$PROJECT_DIR$/egs/aishellorg/data/test/text" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/egs/aishellorg/data/test/wav.scp" beforeDir="false" afterPath="$PROJECT_DIR$/egs/aishellorg/data/test/wav.scp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/egs/aishellorg/data/train/text" beforeDir="false" afterPath="$PROJECT_DIR$/egs/aishellorg/data/train/text" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/egs/aishellorg/data/train/wav.scp" beforeDir="false" afterPath="$PROJECT_DIR$/egs/aishellorg/data/train/wav.scp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/meta.py" beforeDir="false" afterPath="$PROJECT_DIR$/meta.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/omniglot.py" beforeDir="false" afterPath="$PROJECT_DIR$/omniglot.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -13,8 +25,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/meta.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="132">
-              <caret line="126" column="25" selection-start-line="126" selection-start-column="25" selection-end-line="126" selection-end-column="25" />
+            <state relative-caret-position="-77">
+              <caret line="104" column="40" selection-start-line="104" selection-start-column="40" selection-end-line="104" selection-end-column="40" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -25,8 +37,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/omniglot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-902">
-              <caret line="576" column="101" selection-start-line="576" selection-start-column="101" selection-end-line="576" selection-end-column="101" />
+            <state relative-caret-position="417">
+              <caret line="355" column="15" selection-start-line="355" selection-start-column="15" selection-end-line="355" selection-end-column="15" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
               </folding>
@@ -37,8 +49,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/egs/aishellorg/conf/transformer.yaml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="418">
-              <caret line="19" column="24" selection-start-line="19" selection-start-column="24" selection-end-line="19" selection-end-column="24" />
+            <state relative-caret-position="66">
+              <caret line="3" column="16" selection-start-line="3" selection-start-column="16" selection-end-line="3" selection-end-column="16" />
             </state>
           </provider>
         </entry>
@@ -114,6 +126,9 @@
       <find>n_way</find>
     </findStrings>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
@@ -137,6 +152,7 @@
     <option name="width" value="688" />
     <option name="height" value="904" />
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
@@ -180,6 +196,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../OpenTransformer-masternew" />
   </component>
   <component name="RunDashboard">
@@ -373,8 +390,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/meta.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="126" column="25" selection-start-line="126" selection-start-column="25" selection-end-line="126" selection-end-column="25" />
+        <state relative-caret-position="-77">
+          <caret line="104" column="40" selection-start-line="104" selection-start-column="40" selection-end-line="104" selection-end-column="40" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
@@ -383,15 +400,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/egs/aishellorg/conf/transformer.yaml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="418">
-          <caret line="19" column="24" selection-start-line="19" selection-start-column="24" selection-end-line="19" selection-end-column="24" />
+        <state relative-caret-position="66">
+          <caret line="3" column="16" selection-start-line="3" selection-start-column="16" selection-end-line="3" selection-end-column="16" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/omniglot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-902">
-          <caret line="576" column="101" selection-start-line="576" selection-start-column="101" selection-end-line="576" selection-end-column="101" />
+        <state relative-caret-position="417">
+          <caret line="355" column="15" selection-start-line="355" selection-start-column="15" selection-end-line="355" selection-end-column="15" />
           <folding>
             <element signature="e#0#32#0" expanded="true" />
           </folding>

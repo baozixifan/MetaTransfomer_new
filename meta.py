@@ -110,6 +110,13 @@ class Meta(nn.Module):
 
         for i in range(task_num):
 
+            features_spt = torch.from_numpy(features_spts[i]).to(self.device)
+
+            # print(f"features_spts = {features_spts[i]}")
+            # print(f"features_length_spts = {features_length_spts[i]}")
+            # print(f"targets_spts = {targets_spts[i]}")
+            # print(f"targets_length_spts = {targets_length_spts[i]}")
+
             # 1. run the i-th task and compute loss for k=0
             features_spt, features_length_spt, targets_spt, targets_length_spt, \
             features_qry, features_length_qry, targets_qry, targets_length_qry\
