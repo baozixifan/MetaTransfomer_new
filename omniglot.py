@@ -258,16 +258,18 @@ class AudioDataset(Dataset):
         self.datasetSplit = {}
         num = 0
         idxTmp = ''
+        end = 'end'
         with open(os.path.join(params[name], 'wav.scp'), 'r', encoding='utf-8') as fid:
             for line in fid:
                 idx, path = line.strip().split()
-                if idxTmp != idx[:-5]:
-                    idxTmp = idx[:-5]
+                if idxTmp != idx[0]:
+                    idxTmp = idx[0]
                     start = num
                     self.datasetSplit[idxTmp] = start
                 self.file_list.append([idx, path])
                 num += 1
-        # print(self.datasetSplit)
+        self.datasetSplit[end] = num
+        print(self.datasetSplit)
         print(f"len_datasetSplit = {len(self.datasetSplit)}")
 
         assert len(self.file_list) == len(
@@ -370,6 +372,7 @@ def collate_fn_with_eos_bos_indepTask(batch):
             [BOS] + target + [EOS] + [PAD] * (max_target_length - target_len))
 
     features = padded_features
+    # print(features.shape)
     targets = padded_targets
     features_length = np.array(features_length)
     targets_length = np.array(targets_length)
@@ -462,9 +465,9 @@ class FeatureLoader(object):
         indicesAll = list(range(len(dataset)))
 
 
-        self.samplerTask1 = MySubsetSampler(indicesAll[dataset.datasetSplit[keys[0]]:dataset.datasetSplit[keys[113]]])
-        self.samplerTask2 = MySubsetSampler(indicesAll[dataset.datasetSplit[keys[113]]:dataset.datasetSplit[keys[226]]])
-        self.samplerTask3 = MySubsetSampler(indicesAll[dataset.datasetSplit[keys[226]]:dataset.datasetSplit[keys[339]]])
+        self.samplerTask1 = MySubsetSampler(indicesAll[dataset.datasetSplit[keys[0]]:dataset.datasetSplit[keys[1]]])
+        self.samplerTask2 = MySubsetSampler(indicesAll[dataset.datasetSplit[keys[1]]:dataset.datasetSplit[keys[2]]])
+        self.samplerTask3 = MySubsetSampler(indicesAll[dataset.datasetSplit[keys[2]]:dataset.datasetSplit[keys[3]]])
 
 
         self.loaderTask1 = torch.utils.data.DataLoader(dataset, batch_size=dataset.batch_size,
