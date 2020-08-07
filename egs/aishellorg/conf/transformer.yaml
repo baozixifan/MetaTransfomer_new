@@ -1,7 +1,7 @@
 data:
   name: aishellorg
   vocab: egs/aishellorg/data/train_chars.txt
-  batch_size: 6
+  batch_size: 14
   text: text
   train: egs/aishellorg/data/train
   test: egs/aishellorg/data/test
