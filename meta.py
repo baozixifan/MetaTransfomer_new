@@ -86,7 +86,7 @@ class Meta(nn.Module):
         return total_norm/counter
 
 
-    def forward(self, support, query):
+    def forward(self, features_spts, features_length_spts, targets_spts, targets_length_spts, features_qrys, features_length_qrys, targets_qrys, targets_length_qrys):
         """
 
         :param x_spt:   [b, setsz, c_, h, w]
@@ -95,11 +95,6 @@ class Meta(nn.Module):
         :param y_qry:   [b, querysz]
         :return:
         """
-        features_spts, features_length_spts, targets_spts, targets_length_spts \
-            = support['features_spts'], support['features_length_spts'], support['targets_spts'], support['targets_length_spts']
-
-        features_qrys, features_length_qrys, targets_qrys, targets_length_qrys \
-            = query['features_qrys'], query['features_length_qrys'], query['targets_qrys'], query['targets_length_qrys']
 
         task_num = len(features_spts)
         # print(f"task_num = {task_num}")
@@ -109,8 +104,6 @@ class Meta(nn.Module):
 
 
         for i in range(task_num):
-
-            features_spt = torch.from_numpy(features_spts[i]).to(self.device)
 
             # print(f"features_spts = {features_spts[i]}")
             # print(f"features_length_spts = {features_length_spts[i]}")
@@ -151,7 +144,6 @@ class Meta(nn.Module):
 
                 losses_q[k + 1] += loss_q
 
-
         # end of all tasks
         # sum over all losses on query set across all tasks
         loss_q = losses_q[-1] / task_num
@@ -169,9 +161,10 @@ class Meta(nn.Module):
             params.grad = sum_gradients[i]
 
         self.meta_optim.step()
+        del sum_gradients, losses_q
 
 
-        return loss_q
+        return loss_q.item()
 
 
     def finetunning(self, features, features_length, targets, targets_length, fast_model):

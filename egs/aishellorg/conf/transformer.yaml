@@ -4,8 +4,9 @@ data:
   batch_size: 14
   text: text
   train: egs/aishellorg/data/train
-  test: egs/aishellorg/data/test
   dev: egs/aishellorg/data/dev
+  finetunetrain: egs/aishellorg/data/finetunetrain
+  finetunedev: egs/aishellorg/data/finetunedev
   short_first: False
   num_mel_bins: 40
   apply_cmvn: False
@@ -37,7 +38,7 @@ model:
   #前向传播层的隐层
   enc_input_layer: conv2d
   # decoder related
-  vocab_size: 4318
+  vocab_size: 4899
   #词典大小
   num_dec_blocks: 6
   dec_ffn_units: 1280

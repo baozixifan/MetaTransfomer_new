@@ -218,7 +218,7 @@ def collate_fn_with_eos_bos_test(batch):
 
 
 class FeatureLoaderTest(object):
-    def __init__(self, dataset, shuffle=False, ngpu=1, mode='ddp', testBatch=10):
+    def __init__(self, dataset, shuffle=False, ngpu=1, testBatch=10):
 
         self.sampler = None
         self.loader = torch.utils.data.DataLoader(dataset, batch_size=testBatch,
@@ -356,7 +356,7 @@ def collate_fn_with_eos_bos_indepTask(batch):
 
     k_shot = 7
     k_query = 7
-    utt_ids = [data[0] for data in batch]
+    # utt_ids = [data[0] for data in batch]
     features_length = [data[2] for data in batch]
     targets_length = [data[4] for data in batch]
     max_feature_length = max(features_length)
@@ -371,27 +371,26 @@ def collate_fn_with_eos_bos_indepTask(batch):
         padded_targets.append(
             [BOS] + target + [EOS] + [PAD] * (max_target_length - target_len))
 
-    features = padded_features
-    # print(features.shape)
-    targets = padded_targets
+    # features = padded_features
+    # targets = padded_targets
     features_length = np.array(features_length)
     targets_length = np.array(targets_length)
 
     #划分support和query集
-    utt_ids_spt = utt_ids[:k_shot]
-    features_spt = np.array(features[:k_shot]).reshape(k_shot, -1, 40)
+    # utt_ids_spt = utt_ids[:k_shot]
+    features_spt = np.array(padded_features[:k_shot]).reshape(k_shot, -1, 40)
     features_spt_length = np.array(features_length[:k_shot])
-    targets_spt = np.array(targets[:k_shot]).reshape(k_shot, -1)
+    targets_spt = np.array(padded_targets[:k_shot]).reshape(k_shot, -1)
     targets_spt_length = np.array(targets_length[:k_shot])
 
-    utt_ids_qry = utt_ids[k_shot:]
-    features_qry = np.array(features[k_shot:]).reshape(k_query, -1, 40)
+    # utt_ids_qry = utt_ids[k_shot:]
+    features_qry = np.array(padded_features[k_shot:]).reshape(k_query, -1, 40)
     features_qry_length = np.array(features_length[k_shot:])
-    targets_qry = np.array(targets[k_shot:]).reshape(k_query, -1)
+    targets_qry = np.array(padded_targets[k_shot:]).reshape(k_query, -1)
     targets_qry_length = np.array(targets_length[k_shot:])
 
 
-    return utt_ids_spt, features_spt, features_spt_length, targets_spt, targets_spt_length, utt_ids_qry, features_qry, features_qry_length, targets_qry, targets_qry_length
+    return features_spt, features_spt_length, targets_spt, targets_spt_length, features_qry, features_qry_length, targets_qry, targets_qry_length
 
 
 def collate_fn_with_eos_bos(batch):
@@ -571,6 +570,8 @@ if __name__ == "__main__":
     from itertools import cycle
     from otrans.utils import map_to_cuda, init_logger, AverageMeter, Summary
     from copy import deepcopy
+    import objgraph
+    from otrans.optim import TransformerOptimizer
 
     argparser = argparse.ArgumentParser()
     argparser.add_argument('--epoch', type=int, help='epoch number', default=400)
@@ -582,7 +583,7 @@ if __name__ == "__main__":
     argparser.add_argument('--meta_lr', type=float, help='meta-level outer learning rate', default=1e-4)
     argparser.add_argument('--update_lr', type=float, help='task-level inner update learning rate', default=1e-4)
     argparser.add_argument('--update_step', type=int, help='task-level inner update steps', default=5)
-    argparser.add_argument('--update_step_test', type=int, help='update steps for finetunning', default=10)
+    argparser.add_argument('--update_step_test', type=int, help='update steps for finetunning', default=2)
 
     argparser.add_argument('-c', '--config', type=str, default=None)
     argparser.add_argument('-n', '--ngpu', type=int, default=1)
@@ -607,41 +608,12 @@ if __name__ == "__main__":
                                  mode='dp')
 
     maml = Meta(args, params)
-    # task1 = iter(train_loader.loaderTask1)
-    # task2 = iter(train_loader.loaderTask2)
-    # task3 = iter(train_loader.loaderTask3)
-    #
-    # for i in range(50):
-    #     print(f"{i}************************************************************")
-    #     (supportTask1, queryTask1) = task1.next()
-    #     print(f"supportTask1 = {supportTask1}")
-    #     # print(f"queryTask1 = {queryTask1}")
-    #
-    #     (supportTask2, queryTask2) = task2.next()
-    #     print(f"supportTask2 = {supportTask2}")
-    #     # print(f"queryTask2 = {queryTask2}")
-    #
-    #     (supportTask3, queryTask3) = task3.next()
-    #     print(f"supportTask2 = {supportTask3}")
-    #     # print(f"queryTask2 = {queryTask3}")
 
-    utt_ids_spts = []
-    features_spts = []
-    features_length_spts = []
-    targets_spts = []
-    targets_length_spts = []
-
-    utt_ids_qrys = []
-    features_qrys = []
-    features_length_qrys = []
-    targets_qrys = []
-    targets_length_qrys = []
-
-    testLossNote = Summary()
+    fineTuneDevLossNote = Summary()
 
     for epoch in range(args.epoch):
 
-        for step, data in enumerate(zip(train_loader.loaderTask1, train_loader.loaderTask2, train_loader.loaderTask3)):
+        for step, data in enumerate(zip(cycle(train_loader.loaderTask1), cycle(train_loader.loaderTask2), train_loader.loaderTask3)):
             # print(f"step = {step}")
             # print(f"utt_ids = {utt_ids}")
 
@@ -655,97 +627,107 @@ if __name__ == "__main__":
             # print(f"supportTask2 = {supportTask2}")
             # print("*" * 50)
             # print(f"supportTask3 = {supportTask3}")
-            for i in range(args.task_num):
-                utt_ids_spt, features_spt, features_length_spt, targets_spt, targets_length_spt,\
-                utt_ids_qry, features_qry, features_length_qry, targets_qry, targets_length_qry = data[i]
 
-                utt_ids_spts.append(utt_ids_spt)
-                features_spts.append(features_spt)
-                features_length_spts.append(features_length_spt)
-                targets_spts.append(targets_spt)
-                targets_length_spts.append(targets_length_spt)
-
-                utt_ids_qrys.append(utt_ids_qry)
-                features_qrys.append(features_qry)
-                features_length_qrys.append(features_length_qry)
-                targets_qrys.append(targets_qry)
-                targets_length_qrys.append(targets_length_qry)
-
-
-
-
-            # print(f"features_spts = {features_spts}")
-            # print(f"features_length_spts = {features_length_spts}")
-            # print(f"targets_spts = {targets_spts}")
-            # print(f"targets_length_spts = {targets_length_spts}")
-
-            support = {
-                "features_spts": features_spts,
-                "features_length_spts": features_length_spts,
-                "targets_spts": targets_spts,
-                "targets_length_spts": targets_length_spts
-            }
-            query = {
-                "features_qrys": features_qrys,
-                "features_length_qrys": features_length_qrys,
-                "targets_qrys": targets_qrys,
-                "targets_length_qrys": targets_length_qrys
-            }
-
-            loss = maml(support, query)
-            print('step:', step, '\ttraining loss:', loss.item())
-
-            utt_ids_spts = []
             features_spts = []
             features_length_spts = []
             targets_spts = []
             targets_length_spts = []
 
-            utt_ids_qrys = []
             features_qrys = []
             features_length_qrys = []
             targets_qrys = []
             targets_length_qrys = []
+            for i in range(args.task_num):
+                features_spt, features_length_spt, targets_spt, targets_length_spt,\
+                features_qry, features_length_qry, targets_qry, targets_length_qry = data[i]
 
-        if (epoch) % 1 == 0:
-            logger.info(f"'epoch:', {epoch}, 'training loss:', {loss}")
+                features_spts.append(features_spt)
+                features_length_spts.append(features_length_spt)
+                targets_spts.append(targets_spt)
+                targets_length_spts.append(targets_length_spt)
 
-        if (epoch) % 1 == 0:
-            # torch.cuda.empty_cache()
-            fast_model = deepcopy(maml.net)
-            fast_model.eval()
+                features_qrys.append(features_qry)
+                features_length_qrys.append(features_length_qry)
+                targets_qrys.append(targets_qry)
+                targets_length_qrys.append(targets_length_qry)
 
-            lossTest = 0
+            # print(f"utt_ids_spt = {type(utt_ids_spt)}")
+            # print(f"features_spts = {type(features_spt)}")
+            # print(f"features_length_spts = {type(features_length_spt)}")
+            # print(f"targets_spts = {targets_spt}")
+            # print(f"targets_length_spts = {targets_length_spts}")
+            # new_ids = objgraph.get_new_ids(limit=3)
+            # objgraph.show_growth(limit=5)
 
-            test_dataset = AudioDatasetTest(params['data'], 'test')
+            loss = maml(features_spts, features_length_spts, targets_spts, targets_length_spts, features_qrys, features_length_qrys, targets_qrys, targets_length_qrys)
 
-            test_loader = FeatureLoaderTest(test_dataset, shuffle=False, ngpu=1,
-                                         mode='dp')
-            for stepInner, batch in enumerate(test_loader.loader):
-                batch = map_to_cuda(batch)
-                features, features_length, targets, targets_length = \
-                    batch['inputs'], batch['inputs_length'], batch['targets'], batch['targets_length']
+            if (step+1) % 100 == 0:
+                print(f'epoch : {epoch}--step : {step+1}--training loss : {loss}')
 
-                testLoss = maml.finetunning(features, features_length, targets, targets_length, fast_model)
-                # lossTest.append(testLoss)
-                if (stepInner+1) % 200 == 0:
-                    logger.info(f"test : epochTest = 1 ; stepInner = {stepInner} ; testLoss = {testLoss}")
-                lossTest += testLoss.item()
+            # if (step + 1) % 10 == 0:
+            #     break
 
-            lossTestAvg = lossTest / stepInner
-            logger.info(f"testLoss average = {lossTestAvg}")
-            testLossNote.update(epoch, lossTestAvg)
+            if (step+1) % 500 == 0:
+                # torch.cuda.empty_cache()
+                fast_model = deepcopy(maml.net)
+                fast_model.train()
 
-            if lossTestAvg <= testLossNote.best()[1]:
-                logger.info(f'Update the best checkpoint! epoch = {epoch}')
+                step_loss = AverageMeter()
 
-            save_name = 'model.temp.%d.pt' % epoch
-            logger.info(f'save the model : {save_name}')
-            save_model(maml.net, expdir, epoch=epoch, save_name=None)
+                finetune_dataset = AudioDatasetTest(params['data'], 'finetunetrain')
+                finetune_loader = FeatureLoaderTest(finetune_dataset, shuffle=False, ngpu=0,
+                                             testBatch=10)
+                dev_dataset = AudioDatasetTest(params['data'], 'finetunedev')
+                dev_loader = FeatureLoaderTest(dev_dataset, shuffle=False, ngpu=0,
+                                             testBatch=10)
+                optimizer = TransformerOptimizer(fast_model, params['train'], model_size=params['model']['d_model'])
 
-            del fast_model
 
-            # torch.cuda.empty_cache()
+                for epochInner in range(args.update_step_test):
+                    for stepInner, batch in enumerate(finetune_loader.loader):
+                        batch = map_to_cuda(batch)
+                        features, features_length, targets, targets_length = \
+                            batch['inputs'], batch['inputs_length'], batch['targets'], batch['targets_length']
+
+                        fineTuneLoss = maml.finetunning(features, features_length, targets, targets_length, fast_model)
+                        # lossTest.append(testLoss)
+                        fineTuneLoss.backward()
+                        optimizer.step()
+                        optimizer.zero_grad()
+
+                        if (stepInner+1) % 200 == 0:
+                            logger.info(f"train : stepInner = {stepInner+1} ; fineTuneLoss = {fineTuneLoss.item()}")
+                        step_loss.update(fineTuneLoss.item(), features.size(0))
+
+                    logger.info(f"train : epochInner:{epochInner}--fineTuneLoss average = {step_loss.avg}")
+                    step_loss.reset()
+
+                    if dev_dataset is not None:
+                        fast_model.eval()
+                        eval_loss = 0
+                        for evalStep, batch in enumerate(dev_loader.loader):
+                            batch = map_to_cuda(batch)
+                            features, features_length, targets, targets_length = \
+                                batch['inputs'], batch['inputs_length'], batch['targets'], batch['targets_length']
+                            loss = maml.finetunning(features, features_length, targets, targets_length, fast_model)
+                            eval_loss += loss.item()
+                        sumEvalLoss = eval_loss / (evalStep+1)
+                        logger.info(f"dev : epochInner:{epochInner}--sumEvalLoss average = {sumEvalLoss}")
+
+                fineTuneDevLossNote.update(epoch, sumEvalLoss)
+
+                if sumEvalLoss <= fineTuneDevLossNote.best()[1]:
+                    logger.info(f'Update the best checkpoint! epoch = {epoch}')
+
+                    save_name = 'model.temp.%d.pt' % epoch
+                    logger.info(f'save the model : {save_name}')
+                    save_model(maml.net, expdir, epoch=epoch, save_name=None)
+
+                del fast_model
+
+                break
+
+                # torch.cuda.empty_cache()
 
 
 
