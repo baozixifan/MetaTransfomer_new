@@ -118,13 +118,12 @@ class Meta(nn.Module):
                   torch.from_numpy(features_qrys[i]).to(self.device), torch.from_numpy(features_length_qrys[i]).to(self.device), \
                   torch.from_numpy(targets_qrys[i]).to(self.device), torch.from_numpy(targets_length_qrys[i]).to(self.device)
 
-
             fast_model = deepcopy(self.net)
             fast_model.to(self.device)
             inner_optimizer = optim.Adam(fast_model.parameters(), lr=self.update_lr)
             fast_model.train()
 
-            for k in range(1, self.update_step):
+            for k in range(0, self.update_step):
                 # 1. run the i-th task and compute loss for k=1~K-1
                 logits = fast_model(features_spt, features_length_spt, targets_spt, targets_length_spt)
                 target_out = targets_spt[:, 1:].clone()
@@ -163,7 +162,6 @@ class Meta(nn.Module):
         self.meta_optim.step()
         del sum_gradients, losses_q
 
-
         return loss_q.item()
 
 
@@ -180,8 +178,6 @@ class Meta(nn.Module):
 
         # in order to not ruin the state of running_mean/variance and bn_weight/bias
         # we finetunning on the copied model instead of self.net
-        # net = deepcopy(self.net)
-        # print(features)
 
         logits = fast_model(features, features_length, targets, targets_length)
         # print(f'logits = {logits}')

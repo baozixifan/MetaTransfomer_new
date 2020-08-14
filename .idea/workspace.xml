@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6fae5c9f-2239-48c4-9ff0-5a4f21236d16" name="Default Changelist" comment="" />
+    <list default="true" id="6fae5c9f-2239-48c4-9ff0-5a4f21236d16" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/egs/aishellorg/conf/transformer.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/egs/aishellorg/conf/transformer.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/meta.py" beforeDir="false" afterPath="$PROJECT_DIR$/meta.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/omniglot.py" beforeDir="false" afterPath="$PROJECT_DIR$/omniglot.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -13,8 +18,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/meta.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3388">
-              <caret line="166" column="17" selection-start-line="166" selection-start-column="17" selection-end-line="166" selection-end-column="17" />
+            <state relative-caret-position="703">
+              <caret line="158" column="19" lean-forward="true" selection-start-line="158" selection-start-column="19" selection-end-line="158" selection-end-column="19" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -25,8 +30,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/omniglot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="373">
-              <caret line="664" column="57" selection-start-line="664" selection-start-column="57" selection-end-line="664" selection-end-column="57" />
+            <state relative-caret-position="490">
+              <caret line="594" column="21" lean-forward="true" selection-start-line="594" selection-start-column="21" selection-end-line="594" selection-end-column="21" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
               </folding>
@@ -35,10 +40,22 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/otrans/utils.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="231">
+              <caret line="160" column="8" selection-start-line="160" selection-start-column="8" selection-end-line="160" selection-end-column="8" />
+              <folding>
+                <element signature="e#0#12#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/egs/aishellorg/conf/transformer.yaml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="176">
-              <caret line="8" column="46" selection-start-line="8" selection-start-column="46" selection-end-line="8" selection-end-column="46" />
+            <state relative-caret-position="66">
+              <caret line="3" column="16" selection-start-line="3" selection-start-column="16" selection-end-line="3" selection-end-column="16" />
             </state>
           </provider>
         </entry>
@@ -59,7 +76,7 @@
         <entry file="file://$PROJECT_DIR$/otrans/train.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="1823">
-              <caret line="228" column="9" lean-forward="true" selection-start-line="228" selection-start-column="9" selection-end-line="228" selection-end-column="9" />
+              <caret line="228" column="9" selection-start-line="228" selection-start-column="9" selection-end-line="228" selection-end-column="9" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -116,6 +133,12 @@
       <find>Summary</find>
       <find>fineTuneLossNote</find>
       <find>sum_gradients</find>
+      <find>args</find>
+      <find>k_spt</find>
+      <find>k_qry</find>
+      <find>encode</find>
+      <find>update_lr</find>
+      <find>idx2char</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -138,7 +161,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="65" />
     <option name="y" value="24" />
     <option name="width" value="688" />
@@ -149,43 +172,7 @@
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
-    <panes>
-      <pane id="Scope" />
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="MetaTransfomer_new" type="b2602c69:ProjectViewProjectNode" />
-              <item name="MetaTransfomer_new" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="MetaTransfomer_new" type="b2602c69:ProjectViewProjectNode" />
-              <item name="MetaTransfomer_new" type="462c0819:PsiDirectoryNode" />
-              <item name="egs" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="MetaTransfomer_new" type="b2602c69:ProjectViewProjectNode" />
-              <item name="MetaTransfomer_new" type="462c0819:PsiDirectoryNode" />
-              <item name="egs" type="462c0819:PsiDirectoryNode" />
-              <item name="aishellorg" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="MetaTransfomer_new" type="b2602c69:ProjectViewProjectNode" />
-              <item name="MetaTransfomer_new" type="462c0819:PsiDirectoryNode" />
-              <item name="egs" type="462c0819:PsiDirectoryNode" />
-              <item name="aishellorg" type="462c0819:PsiDirectoryNode" />
-              <item name="conf" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="MetaTransfomer_new" type="b2602c69:ProjectViewProjectNode" />
-              <item name="MetaTransfomer_new" type="462c0819:PsiDirectoryNode" />
-              <item name="otrans" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
-    </panes>
+    <panes />
   </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
@@ -226,7 +213,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="65" y="-4" width="1375" height="904" extended-state="6" />
+    <frame x="65" y="-4" width="1375" height="904" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.268546" />
@@ -284,15 +271,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/otrans/utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2440">
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/otrans/layer.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="968">
@@ -340,23 +318,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/meta.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3388">
-          <caret line="166" column="17" selection-start-line="166" selection-start-column="17" selection-end-line="166" selection-end-column="17" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/egs/aishellorg/conf/transformer.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="176">
-          <caret line="8" column="46" selection-start-line="8" selection-start-column="46" selection-end-line="8" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/otrans/module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1870">
@@ -390,17 +351,44 @@
     <entry file="file://$PROJECT_DIR$/otrans/train.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1823">
-          <caret line="228" column="9" lean-forward="true" selection-start-line="228" selection-start-column="9" selection-end-line="228" selection-end-column="9" />
+          <caret line="228" column="9" selection-start-line="228" selection-start-column="9" selection-end-line="228" selection-end-column="9" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/otrans/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="231">
+          <caret line="160" column="8" selection-start-line="160" selection-start-column="8" selection-end-line="160" selection-end-column="8" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/meta.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="703">
+          <caret line="158" column="19" lean-forward="true" selection-start-line="158" selection-start-column="19" selection-end-line="158" selection-end-column="19" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/egs/aishellorg/conf/transformer.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="66">
+          <caret line="3" column="16" selection-start-line="3" selection-start-column="16" selection-end-line="3" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/omniglot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="373">
-          <caret line="664" column="57" selection-start-line="664" selection-start-column="57" selection-end-line="664" selection-end-column="57" />
+        <state relative-caret-position="490">
+          <caret line="594" column="21" lean-forward="true" selection-start-line="594" selection-start-column="21" selection-end-line="594" selection-end-column="21" />
           <folding>
             <element signature="e#0#32#0" expanded="true" />
           </folding>

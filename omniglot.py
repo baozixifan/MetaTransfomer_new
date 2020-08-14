@@ -114,8 +114,6 @@ class AudioDatasetTest(Dataset):
         if self.from_kaldi:
             feature = kio.load_mat(path)
         else:
-            #TODO 去掉
-            # print(f"path = {path}")
             try:
                 wavform, sample_frequency = ta.load_wav(path)
 
@@ -187,7 +185,7 @@ class AudioDatasetTest(Dataset):
 
 def collate_fn_with_eos_bos_test(batch):
 
-    utt_ids = [data[0] for data in batch]
+    # utt_ids = [data[0] for data in batch]
     features_length = [data[2] for data in batch]
     targets_length = [data[4] for data in batch]
     max_feature_length = max(features_length)
@@ -218,16 +216,13 @@ def collate_fn_with_eos_bos_test(batch):
 
 
 class FeatureLoaderTest(object):
-    def __init__(self, dataset, shuffle=False, ngpu=1, testBatch=10):
+    def __init__(self, dataset, shuffle=False, ngpu=1, testBatch=12):
 
         self.sampler = None
         self.loader = torch.utils.data.DataLoader(dataset, batch_size=testBatch,
                                                   shuffle=shuffle if self.sampler is None else False,
                                                   num_workers=2 * ngpu, pin_memory=False, sampler=self.sampler,
                                                   collate_fn=collate_fn_with_eos_bos_test)
-
-
-
 
 
 class AudioDataset(Dataset):
@@ -282,15 +277,10 @@ class AudioDataset(Dataset):
 
         utt_id, path = self.file_list[index]
 
-        #TODO 去掉
-        # print(f"path = {path}")
         try:
             wavform, sample_frequency = ta.load_wav(path)
-
             feature = compute_fbank(wavform, num_mel_bins=self.params['num_mel_bins'],
                                     sample_frequency=sample_frequency)
-
-            # feature = featureTransform(mel_specgram)
         except:
             print(f"path = {path}")
 
@@ -307,18 +297,12 @@ class AudioDataset(Dataset):
                 # print("*"*50)
                 pass
 
-
         feature_length = feature.shape[0]
         targets = self.targets_dict[utt_id]
         targets_length = len(targets)
-        #TODO 去掉
-        # print(f"utt_id = {utt_id}")
-        # print(f"feature = {feature}")
 
 
         return utt_id, feature, feature_length, targets, targets_length
-
-
 
     def __len__(self):
         return self.lengths
@@ -354,9 +338,9 @@ class AudioDataset(Dataset):
 
 def collate_fn_with_eos_bos_indepTask(batch):
 
-    k_shot = 7
-    k_query = 7
-    # utt_ids = [data[0] for data in batch]
+    k_shot = 20
+    k_query = 20
+    utt_ids = [data[0] for data in batch]
     features_length = [data[2] for data in batch]
     targets_length = [data[4] for data in batch]
     max_feature_length = max(features_length)
@@ -371,79 +355,32 @@ def collate_fn_with_eos_bos_indepTask(batch):
         padded_targets.append(
             [BOS] + target + [EOS] + [PAD] * (max_target_length - target_len))
 
-    # features = padded_features
-    # targets = padded_targets
     features_length = np.array(features_length)
     targets_length = np.array(targets_length)
 
-    #划分support和query集
-    # utt_ids_spt = utt_ids[:k_shot]
-    features_spt = np.array(padded_features[:k_shot]).reshape(k_shot, -1, 40)
-    features_spt_length = np.array(features_length[:k_shot])
-    targets_spt = np.array(padded_targets[:k_shot]).reshape(k_shot, -1)
-    targets_spt_length = np.array(targets_length[:k_shot])
+    support = {
+        'features_spt': np.array(padded_features[:k_shot]).reshape(k_shot, -1, 40),
+        'features_spt_length': np.array(features_length[:k_shot]),
+        'targets_spt': np.array(padded_targets[:k_shot]).reshape(k_shot, -1),
+        'targets_spt_length': np.array(targets_length[:k_shot])
+    }
 
-    # utt_ids_qry = utt_ids[k_shot:]
-    features_qry = np.array(padded_features[k_shot:]).reshape(k_query, -1, 40)
-    features_qry_length = np.array(features_length[k_shot:])
-    targets_qry = np.array(padded_targets[k_shot:]).reshape(k_query, -1)
-    targets_qry_length = np.array(targets_length[k_shot:])
+    query = {
+        'features_qry': np.array(padded_features[k_shot:]).reshape(k_query, -1, 40),
+        'features_qry_length': np.array(features_length[k_shot:]),
+        'targets_qry': np.array(padded_targets[k_shot:]).reshape(k_query, -1),
+        'targets_qry_length': np.array(targets_length[k_shot:])
+    }
 
+    utt_ids_spt = utt_ids[:k_shot]
+    utt_ids_qry = utt_ids[k_shot:]
 
-    return features_spt, features_spt_length, targets_spt, targets_spt_length, features_qry, features_qry_length, targets_qry, targets_qry_length
+    # print(f"utt_ids_spt = {utt_ids_spt}")
+    # print(f"support = {support}")
+    # print(f"utt_ids_qry = {utt_ids_qry}")
+    # print(f"query = {query}")
 
-
-def collate_fn_with_eos_bos(batch):
-
-
-    utt_ids = [data[0] for data in batch]
-    features_length = [data[2] for data in batch]
-    targets_length = [data[4] for data in batch]
-
-    padded_features = [data[1] for data in batch]
-    padded_targets = [data[3] for data in batch]
-
-    features = padded_features
-    features_length = features_length
-    targets = padded_targets
-    targets_length = targets_length
-
-    #划分support和query集
-    utt_ids_spt = utt_ids[:3]
-    features_spt = features[:3]
-    features_spt_length = features_length[:3]
-    targets_spt = targets[:3]
-    targets_spt_length = targets_length[:3]
-
-    utt_ids_qry = utt_ids[3:]
-    features_qry = features[3:]
-    features_qry_length = features_length[3:]
-    targets_qry = targets[3:]
-    targets_qry_length = targets_length[3:]
-
-    # query = {
-    #     "utt_ids": utt_ids_qry,
-    #     'features': features_qry,
-    #     'features_length': features_qry_length,
-    #     'targets': targets_qry,
-    #     'targets_length': targets_qry_length
-    # }
-    support = []
-    support.append(utt_ids_spt)
-    support.append(features_spt)
-    support.append(features_spt_length)
-    support.append(targets_spt)
-    support.append(targets_spt_length)
-
-    query = []
-    query.append(utt_ids_qry)
-    query.append(features_qry)
-    query.append(features_qry_length)
-    query.append(targets_qry)
-    query.append(targets_qry_length)
-
-    return support, query
-
+    return utt_ids_spt, support, utt_ids_qry, query
 
 
 class MySubsetSampler(SubsetRandomSampler):
@@ -454,9 +391,8 @@ class MySubsetSampler(SubsetRandomSampler):
 
 
 
-
 class FeatureLoader(object):
-    def __init__(self, dataset, shuffle=False, ngpu=1, mode='ddp'):
+    def __init__(self, dataset, shuffle=False, ngpu=1):
 
         keys = list(dataset.datasetSplit.keys())
         lenKeys = len(keys)
@@ -483,69 +419,6 @@ class FeatureLoader(object):
                                                   collate_fn=collate_fn_with_eos_bos_indepTask)
 
 
-def lengthTrans(listTest):
-    listTmp = []
-    listTest = np.array(listTest)
-    for i in range(listTest.shape[0]):
-        for j in range(listTest.shape[1]):
-            listTmp.append(listTest[i][j])
-    return listTmp
-
-
-
-def appendSet(listSet:list, n_way, k_shot_query):
-
-    listLen = len(listSet)
-    utt_ids = []
-    features = []
-    features_length = []
-    targets = []
-    targets_length = []
-    for i in listSet:
-        utt_ids.append(i[0])
-        features.append(i[1])
-        features_length.append(i[2])
-        targets.append(i[3])
-        targets_length.append(i[4])
-
-    features_length = lengthTrans(features_length)
-    targets_length = lengthTrans(targets_length)
-
-    max_feature_length = max(features_length)
-    max_target_length = max(targets_length)
-
-    padded_features = []
-    padded_targets = []
-
-    for i in range(listLen):
-        for j in range(k_shot_query):
-            padded_features.append(np.pad(features[i][j], ((
-                0, max_feature_length-features_length[i * k_shot_query + j]), (0, 0)), mode='constant', constant_values=0.0))
-            # print(padded_features)
-            # print(padded_features[j].shape)
-            padded_targets.append(
-                np.array([BOS] + targets[i][j] + [EOS] + [PAD] * (max_target_length - targets_length[i * k_shot_query + j]))
-            )
-
-    # for i in range(listLen*k_shot_query):
-    #     print(padded_features[i].shape)
-    # print(np.array(padded_features).shape)
-    # print(np.array(padded_features))
-    # print(len(padded_features))
-    # print(padded_features[40].shape)
-    #reshape self.n_way * self.k_shot
-    #TODO:feature维度
-    features = np.array(padded_features).reshape(n_way * k_shot_query, -1, 40)
-    targets = np.array(padded_targets).reshape(n_way * k_shot_query, -1)
-    features_length = np.array(features_length)
-    targets_length = np.array(targets_length)
-
-    # print(f"features = {features}")
-    # print(f"features_length = {features_length}")
-    # print(f"targets = {targets}")
-    # print(f"targets_length = {targets_length}")
-
-    return utt_ids, features, features_length, targets, targets_length
 
 def save_model(model, expdir, epoch=None, save_name=None):
     if save_name is None:
@@ -563,37 +436,43 @@ def load_model(model, checkpoint):
     state_dict = torch.load(checkpoint)
     model.load_state_dict(state_dict['model'])
 
+def cycle(iterable):
+    iterator = iter(iterable)
+    while True:
+        try:
+            yield next(iterator)
+        except StopIteration:
+            iterator = iter(iterable)
+
 if __name__ == "__main__":
     import yaml
     from meta import Meta
     import argparse
-    from itertools import cycle
+    # from itertools import cycle
     from otrans.utils import map_to_cuda, init_logger, AverageMeter, Summary
     from copy import deepcopy
     import objgraph
     from otrans.optim import TransformerOptimizer
 
     argparser = argparse.ArgumentParser()
-    argparser.add_argument('--epoch', type=int, help='epoch number', default=400)
-    argparser.add_argument('--n_way', type=int, help='n way', default=5)
-    argparser.add_argument('--k_spt', type=int, help='k shot for support set', default=1)
-    argparser.add_argument('--k_qry', type=int, help='k shot for query set', default=3)
+    argparser.add_argument('--epoch', type=int, help='epoch number', default=40)
+    argparser.add_argument('--n_way', type=int, help='n way', default=3)
+    argparser.add_argument('--k_spt', type=int, help='k shot for support set', default=16)
+    argparser.add_argument('--k_qry', type=int, help='k shot for query set', default=16)
 
     argparser.add_argument('--task_num', type=int, help='meta batch size, namely task num', default=3)
     argparser.add_argument('--meta_lr', type=float, help='meta-level outer learning rate', default=1e-4)
     argparser.add_argument('--update_lr', type=float, help='task-level inner update learning rate', default=1e-4)
-    argparser.add_argument('--update_step', type=int, help='task-level inner update steps', default=5)
-    argparser.add_argument('--update_step_test', type=int, help='update steps for finetunning', default=2)
+    argparser.add_argument('--update_step', type=int, help='task-level inner update steps', default=1)
+    argparser.add_argument('--update_step_test', type=int, help='update steps for finetunning', default=3)
 
-    argparser.add_argument('-c', '--config', type=str, default=None)
+    # argparser.add_argument('-c', '--config', type=str, default=None)
     argparser.add_argument('-n', '--ngpu', type=int, default=1)
     argparser.add_argument('-s', '--seed', type=int, default=1222)
-    argparser.add_argument('-p', '--parallel_mode', type=str, default='dp')
-    argparser.add_argument('-r', '--local_rank', type=int, default=0)
 
     args = argparser.parse_args()
 
-    with open(r"egs/aishellorg/conf/transformer.yaml", 'r') as f:
+    with open(r"/home/ljj/PycharmProjects/MetaTransfomer_new/egs/aishellorg/conf/transformer.yaml", 'r') as f:
         params = yaml.load(f, Loader=yaml.FullLoader)
 
     expdir = os.path.join('egs', params['data']['name'], 'exp', params['train']['save_name'])
@@ -604,8 +483,7 @@ if __name__ == "__main__":
 
     train_dataset = AudioDataset(params['data'], 'train')
 
-    train_loader = FeatureLoader(train_dataset, shuffle=False, ngpu=1,
-                                 mode='dp')
+    train_loader = FeatureLoader(train_dataset, shuffle=False, ngpu=1)
 
     maml = Meta(args, params)
 
@@ -614,19 +492,6 @@ if __name__ == "__main__":
     for epoch in range(args.epoch):
 
         for step, data in enumerate(zip(cycle(train_loader.loaderTask1), cycle(train_loader.loaderTask2), train_loader.loaderTask3)):
-            # print(f"step = {step}")
-            # print(f"utt_ids = {utt_ids}")
-
-            # (supportTask1, queryTask1) = data[0]
-            # (supportTask2, queryTask2) = data[1]
-            # (supportTask3, queryTask3) = data[2]
-            #
-            # print("*" * 50)
-            # print(f"supportTask1 = {supportTask1}")
-            # print("*" * 50)
-            # print(f"supportTask2 = {supportTask2}")
-            # print("*" * 50)
-            # print(f"supportTask3 = {supportTask3}")
 
             features_spts = []
             features_length_spts = []
@@ -638,8 +503,10 @@ if __name__ == "__main__":
             targets_qrys = []
             targets_length_qrys = []
             for i in range(args.task_num):
-                features_spt, features_length_spt, targets_spt, targets_length_spt,\
-                features_qry, features_length_qry, targets_qry, targets_length_qry = data[i]
+                _, support, _, query = data[i]
+
+                features_spt, features_length_spt, targets_spt, targets_length_spt = support.values()
+                features_qry, features_length_qry, targets_qry, targets_length_qry = query.values()
 
                 features_spts.append(features_spt)
                 features_length_spts.append(features_length_spt)
@@ -656,19 +523,16 @@ if __name__ == "__main__":
             # print(f"features_length_spts = {type(features_length_spt)}")
             # print(f"targets_spts = {targets_spt}")
             # print(f"targets_length_spts = {targets_length_spts}")
+
             # new_ids = objgraph.get_new_ids(limit=3)
             # objgraph.show_growth(limit=5)
 
             loss = maml(features_spts, features_length_spts, targets_spts, targets_length_spts, features_qrys, features_length_qrys, targets_qrys, targets_length_qrys)
 
-            if (step+1) % 100 == 0:
-                print(f'epoch : {epoch}--step : {step+1}--training loss : {loss}')
+            if (step+1) % 200 == 0:
+                logger.info(f'epoch : {epoch}--step : {step+1}--training loss : {loss}')
 
-            # if (step + 1) % 10 == 0:
-            #     break
-
-            if (step+1) % 500 == 0:
-                # torch.cuda.empty_cache()
+            if (step+1) % 1000 == 0:
                 fast_model = deepcopy(maml.net)
                 fast_model.train()
 
@@ -676,10 +540,10 @@ if __name__ == "__main__":
 
                 finetune_dataset = AudioDatasetTest(params['data'], 'finetunetrain')
                 finetune_loader = FeatureLoaderTest(finetune_dataset, shuffle=False, ngpu=0,
-                                             testBatch=10)
+                                             testBatch=14)
                 dev_dataset = AudioDatasetTest(params['data'], 'finetunedev')
                 dev_loader = FeatureLoaderTest(dev_dataset, shuffle=False, ngpu=0,
-                                             testBatch=10)
+                                             testBatch=14)
                 optimizer = TransformerOptimizer(fast_model, params['train'], model_size=params['model']['d_model'])
 
 
@@ -695,7 +559,7 @@ if __name__ == "__main__":
                         optimizer.step()
                         optimizer.zero_grad()
 
-                        if (stepInner+1) % 200 == 0:
+                        if (stepInner+1) % 500 == 0:
                             logger.info(f"train : stepInner = {stepInner+1} ; fineTuneLoss = {fineTuneLoss.item()}")
                         step_loss.update(fineTuneLoss.item(), features.size(0))
 
@@ -713,25 +577,19 @@ if __name__ == "__main__":
                             eval_loss += loss.item()
                         sumEvalLoss = eval_loss / (evalStep+1)
                         logger.info(f"dev : epochInner:{epochInner}--sumEvalLoss average = {sumEvalLoss}")
-
-                fineTuneDevLossNote.update(epoch, sumEvalLoss)
+                #TODO:一个epoch中不同step，devloss更新有误。
+                key = str(epoch) + '-' + str(step+1)
+                fineTuneDevLossNote.update(key, sumEvalLoss)
 
                 if sumEvalLoss <= fineTuneDevLossNote.best()[1]:
-                    logger.info(f'Update the best checkpoint! epoch = {epoch}')
+                    logger.info(f'Update the best checkpoint! key = {key}')
 
-                    save_name = 'model.temp.%d.pt' % epoch
+                    save_name = 'model.temp.%d.%d.pt' % (epoch, (step+1))
                     logger.info(f'save the model : {save_name}')
-                    save_model(maml.net, expdir, epoch=epoch, save_name=None)
+                    save_model(maml.net, expdir, epoch=epoch, save_name=save_name)
 
                 del fast_model
 
+            if (step+1) % 4000 == 0:
+                print(f'epoch : {epoch}--step : {step+1}--training loss : {loss}')
                 break
-
-                # torch.cuda.empty_cache()
-
-
-
-
-
-
-

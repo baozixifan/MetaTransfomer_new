@@ -1,7 +1,7 @@
 data:
   name: aishellorg
   vocab: egs/aishellorg/data/train_chars.txt
-  batch_size: 14
+  batch_size: 40
   text: text
   train: egs/aishellorg/data/train
   dev: egs/aishellorg/data/dev
@@ -65,4 +65,4 @@ train:
   #梯度截断步数
   grad_noise: False
   load_model: False
-  save_name: transformerchange
+  save_name: transformerchange3
