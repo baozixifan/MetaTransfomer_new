@@ -12,23 +12,6 @@ import re
 # from    learner import Learner, LearnerTransformer
 from    copy import deepcopy
 
-def gen(list1):
-    for m in list1:
-        yield m
-
-def transferDict(parameters, stateDict):
-
-    parameters = [i for i in parameters]
-    keys = [i for i in stateDict]
-    # print(keys)
-    # print(f"lenParam = {len(parameters)}")
-    # print(f"lenKey = {len(keys)}")
-
-    for i, key in enumerate(keys):
-        stateDict[key] = parameters[i]
-
-    return stateDict
-
 
 
 class Meta(nn.Module):

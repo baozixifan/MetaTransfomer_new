@@ -464,7 +464,7 @@ if __name__ == "__main__":
     argparser.add_argument('--meta_lr', type=float, help='meta-level outer learning rate', default=1e-4)
     argparser.add_argument('--update_lr', type=float, help='task-level inner update learning rate', default=1e-4)
     argparser.add_argument('--update_step', type=int, help='task-level inner update steps', default=1)
-    argparser.add_argument('--update_step_test', type=int, help='update steps for finetunning', default=3)
+    argparser.add_argument('--update_step_test', type=int, help='update steps for finetunning', default=2)
 
     # argparser.add_argument('-c', '--config', type=str, default=None)
     argparser.add_argument('-n', '--ngpu', type=int, default=1)
@@ -486,6 +486,10 @@ if __name__ == "__main__":
     train_loader = FeatureLoader(train_dataset, shuffle=False, ngpu=1)
 
     maml = Meta(args, params)
+
+    if params['train']['load_model'] is not False:
+        print('66666666')
+        load_model(maml.net, params['train']['load_model'])
 
     fineTuneDevLossNote = Summary()
 
